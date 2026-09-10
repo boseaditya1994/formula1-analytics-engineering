@@ -39,7 +39,7 @@ Ingestion commands and Snowflake resources are not implemented yet.
 
 Copy `.env.example` to `.env` when configuring authentication. Never commit
 passwords, tokens, private keys or populated profiles. Existing personal profiles
-are preserved. The planned warehouse is X-Small with auto-suspend and auto-resume.
+are preserved. The project reuses the existing `COMPUTE_WH` warehouse without altering it.
 Costs depend on actual runtime and account pricing.
 
 ## Source and delivery
