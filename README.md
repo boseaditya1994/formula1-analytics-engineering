@@ -1,7 +1,7 @@
 # Formula 1 Analytics Engineering Platform
 
-Automated daily Formula 1 ingestion and analytics with Python, Snowflake, dbt,
-and Tableau Public. This project is under construction; see
+Formula 1 historical ingestion and analytics with Python, Snowflake and dbt.
+Daily scheduling and Tableau Public delivery are planned. See
 [implementation status](docs/implementation_status.md).
 
 ## Architecture
@@ -29,11 +29,14 @@ uv run --frozen f1-pipeline doctor
 uv run --frozen ruff check .
 uv run --frozen python -m pytest
 uv run --frozen dbt --version
+uv run --frozen python scripts/run_dbt.py parse --offline
 ```
 
 Select `.venv/Scripts/python.exe` in VS Code on Windows. Invoke dbt through uv
 so the project uses dbt Core instead of the global Fusion preview.
-Ingestion commands and Snowflake resources are not implemented yet.
+The historical loader supports schedules, race results, qualifying, sprint results,
+and race-by-race driver/constructor standings. See [ingestion](docs/ingestion.md)
+for authentication, backfill commands, grains, reconciliation and recovery.
 
 ## Credentials and costs
 
@@ -45,10 +48,19 @@ Costs depend on actual runtime and account pricing.
 ## Source and delivery
 
 [Jolpica](https://github.com/jolpica/jolpica-f1) supplies race and championship
-data. Planned ingestion uses pagination, an identifying User-Agent, bounded retries,
+data. Ingestion uses pagination, an identifying User-Agent, bounded retries,
 and a conservative request budget. Historical completeness varies by dataset.
 Official standings remain authoritative, including sprint points and penalties.
 
-Snowflake marts and exports will refresh daily. Initial Tableau Public publication
-refresh is manual. No completed ingestion, dashboard, cloud execution or performance
-results are claimed at this stage.
+The F1_ANALYTICS database, five schemas, project roles and ingestion tables are
+provisioned using COMPUTE_WH. Measured load results are recorded in
+[implementation status](docs/implementation_status.md).
+
+The 2025 backfill is verified: 1,840 RAW rows across six datasets. An authenticated
+dbt build passed for eight models and 49 data tests. The expanded 15-model target
+parses offline, but a later Snowflake backend connection error interrupted its
+live build. See [dbt execution](docs/dbt.md), [data model](docs/data_model.md), and
+[current evidence and blocker](docs/implementation_status.md).
+
+Daily scheduling, validated exports and the Tableau dashboard remain pending.
+Initial Tableau Public publication refresh will be manual.

@@ -1,0 +1,21 @@
+name: dbt_f1
+version: 1.0.0
+config-version: 2
+
+profile: dbt_f1
+
+model-paths: [models]
+test-paths: [tests]
+macro-paths: [macros]
+target-path: target
+clean-targets: [target, dbt_packages]
+
+models:
+  dbt_f1:
+    +pre-hook: "USE SECONDARY ROLES NONE"
+    staging:
+      +schema: STAGING
+      +materialized: view
+    marts:
+      +schema: MARTS
+      +materialized: table

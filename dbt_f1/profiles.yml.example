@@ -1,0 +1,13 @@
+dbt_f1:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_ENV_SECRET_F1_ACCOUNT') }}"
+      user: "{{ env_var('DBT_ENV_SECRET_F1_USER') }}"
+      password: "{{ env_var('DBT_ENV_SECRET_F1_PASSWORD') }}"
+      role: F1_TRANSFORMER
+      database: F1_ANALYTICS
+      warehouse: COMPUTE_WH
+      schema: STAGING
+      threads: 1

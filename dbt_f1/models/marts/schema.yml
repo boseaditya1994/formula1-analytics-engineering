@@ -1,0 +1,109 @@
+version: 2
+
+models:
+  - name: dim_driver
+    columns:
+      - name: driver_id
+        tests: [not_null, unique]
+  - name: dim_constructor
+    columns:
+      - name: constructor_id
+        tests: [not_null, unique]
+  - name: dim_circuit
+    columns:
+      - name: circuit_id
+        tests: [not_null, unique]
+  - name: dim_race
+    columns:
+      - name: race_key
+        tests: [not_null, unique]
+      - name: circuit_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_circuit')
+                field: circuit_id
+      - name: season
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_season')", field: season}
+      - name: race_date
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_date')", field: date_day}
+      - name: round_number
+        tests: [not_null]
+  - name: fct_race_results
+    columns:
+      - name: result_key
+        tests: [not_null, unique]
+      - name: driver_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_driver')
+                field: driver_id
+      - name: constructor_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_constructor')
+                field: constructor_id
+      - name: race_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_race')
+                field: race_key
+      - name: points
+        tests: [not_null]
+      - name: finishing_position
+        tests: [not_null]
+      - name: grid_position
+        tests: [not_null]
+  - name: fct_qualifying_results
+    columns:
+      - name: qualifying_key
+        tests: [not_null, unique]
+      - name: driver_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_driver')
+                field: driver_id
+      - name: constructor_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_constructor')
+                field: constructor_id
+      - name: race_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_race')
+                field: race_key
+      - name: qualifying_position
+        tests: [not_null]
+  - name: driver_race_performance
+    description: Dashboard-ready race performance with grid movement and identity attributes.
+    columns:
+      - name: result_key
+        tests: [not_null, unique]
+      - name: season
+        tests: [not_null]
+      - name: round_number
+        tests: [not_null]
+      - name: driver_id
+        tests: [not_null]
+      - name: points
+        tests: [not_null]

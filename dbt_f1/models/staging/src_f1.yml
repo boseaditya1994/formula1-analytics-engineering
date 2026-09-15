@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw
+    database: F1_ANALYTICS
+    schema: RAW
+    tables:
+      - name: source_records
+        description: >-
+          Current-state historical payloads. updated_at records content changes,
+          not successful checks; scheduling freshness is measured from the audit
+          table when daily ingestion is introduced.

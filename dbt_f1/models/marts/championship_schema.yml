@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: dim_season
+    columns:
+      - name: season
+        tests: [not_null, unique]
+  - name: dim_date
+    columns:
+      - name: date_day
+        tests: [not_null, unique]
+  - name: fct_sprint_results
+    description: One row per driver per sprint, keyed by season, round and driver.
+    columns:
+      - name: sprint_key
+        tests: [not_null, unique]
+      - name: points
+        tests: [not_null]
+      - name: driver_id
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_driver')", field: driver_id}
+      - name: constructor_id
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_constructor')", field: constructor_id}
+      - name: race_key
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_race')", field: race_key}
+  - name: fct_driver_standings
+    description: Official driver championship snapshot after each round; points are cumulative.
+    columns:
+      - name: standing_key
+        tests: [not_null, unique]
+      - name: championship_points
+        tests: [not_null]
+      - name: championship_position
+        tests: [not_null]
+      - name: driver_id
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_driver')", field: driver_id}
+      - name: race_key
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_race')", field: race_key}
+  - name: fct_constructor_standings
+    description: Official constructor championship snapshot after each round; points are cumulative.
+    columns:
+      - name: standing_key
+        tests: [not_null, unique]
+      - name: championship_points
+        tests: [not_null]
+      - name: championship_position
+        tests: [not_null]
+      - name: constructor_id
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_constructor')", field: constructor_id}
+      - name: race_key
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: "ref('dim_race')", field: race_key}
+  - name: driver_championship_progression
+    columns:
+      - name: standing_key
+        tests: [not_null, unique]
+  - name: constructor_championship_progression
+    columns:
+      - name: standing_key
+        tests: [not_null, unique]
