@@ -1,15 +1,77 @@
-"""Local diagnostics; ingestion is introduced in later phases."""
+"""Formula 1 historical ingestion and local runtime diagnostics."""
 
 import argparse
 import json
 import platform
+from datetime import UTC, datetime
 from importlib.metadata import version
+from pathlib import Path
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["doctor"])
-    parser.parse_args()
+    commands = parser.add_subparsers(dest="command", required=True)
+    commands.add_parser("doctor")
+    historical = commands.add_parser("backfill", help="Load historical Jolpica partitions")
+    historical.add_argument("--start-season", type=int, required=True)
+    historical.add_argument("--end-season", type=int)
+    historical.add_argument("--round", type=int)
+    historical.add_argument(
+        "--datasets",
+        nargs="+",
+        default=[
+            "races",
+            "results",
+            "qualifying",
+            "sprint",
+            "driverstandings",
+            "constructorstandings",
+        ],
+        choices=[
+            "races",
+            "results",
+            "qualifying",
+            "sprint",
+            "driverstandings",
+            "constructorstandings",
+        ],
+    )
+    historical.add_argument(
+        "--profile-file",
+        type=Path,
+        help="Explicit local dbt credential file; never printed or modified",
+    )
+    args = parser.parse_args()
+    if args.command == "backfill":
+        from f1_pipeline.ingestion import backfill
+
+        end = args.end_season if args.end_season is not None else datetime.now(UTC).year - 1
+        if not 1950 <= args.start_season <= end <= datetime.now(UTC).year:
+            parser.error("Require 1950 <= start-season <= end-season <= current year")
+        if args.round is not None and (args.round < 1 or args.start_season != end):
+            parser.error("A round requires one season and a positive round number")
+        try:
+            backfill(
+                args.start_season,
+                end,
+                list(dict.fromkeys(args.datasets)),
+                args.round,
+                args.profile_file,
+                root=Path.cwd(),
+            )
+        except Exception as exc:
+            # Connector errors can contain identifiers; expose only a safe classification.
+            print(
+                json.dumps(
+                    {
+                        "status": "FAILED",
+                        "error_type": type(exc).__name__,
+                        "error_code": getattr(exc, "errno", None),
+                    }
+                )
+            )
+            raise SystemExit(1) from None
+        return
     packages = (
         "f1-analytics-engineering",
         "dbt-core",

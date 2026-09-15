@@ -389,8 +389,11 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "dbt-snowflake" },
+    { name = "filelock" },
     { name = "httpx" },
     { name = "pydantic-settings" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
     { name = "snowflake-connector-python" },
 ]
 
@@ -403,8 +406,11 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dbt-snowflake", specifier = ">=1.10,<2" },
+    { name = "filelock", specifier = ">=3,<4" },
     { name = "httpx", specifier = ">=0.28,<1" },
     { name = "pydantic-settings", specifier = ">=2,<3" },
+    { name = "python-dotenv", specifier = ">=1,<2" },
+    { name = "pyyaml", specifier = ">=6,<7" },
     { name = "snowflake-connector-python", specifier = ">=3,<5" },
 ]
 

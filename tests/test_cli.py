@@ -18,11 +18,11 @@ def test_doctor_reports_runtime_without_credentials():
     assert report["packages"]["dbt-snowflake"]
 
 
-def test_unimplemented_ingestion_fails_explicitly():
+def test_backfill_requires_explicit_start_season():
     result = subprocess.run(
         [sys.executable, "-m", "f1_pipeline", "backfill"],
         capture_output=True,
         text=True,
     )
     assert result.returncode == 2
-    assert "invalid choice" in result.stderr
+    assert "--start-season" in result.stderr

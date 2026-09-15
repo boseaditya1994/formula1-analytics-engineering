@@ -19,3 +19,4 @@ dbt_f1/dbt_packages/
 dbt_f1/logs/
 data/
 artifacts/
+.pipeline.lock
