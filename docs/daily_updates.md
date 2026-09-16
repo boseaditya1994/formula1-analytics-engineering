@@ -87,6 +87,15 @@ GitHub UI (never committed):
 `F1_PIPELINE_SVC` also needs the `F1_TRANSFORMER` role granted in Snowflake so the
 same key-pair credential covers both ingestion and dbt.
 
+Verified live via `gh workflow run daily_pipeline.yml`: the first attempt failed in
+under 2 seconds with a bare `ValueError`, too fast to be a real Snowflake round trip.
+A temporary debug step confirmed the written key file was empty (`wc -l` returned 0)
+even though `gh secret list` showed `SNOWFLAKE_PRIVATE_KEY` as set — the secret had
+been set from an empty value. Re-setting it directly from the key file
+(`gh secret set SNOWFLAKE_PRIVATE_KEY --body ...` reading the `.p8` file's exact bytes)
+fixed it. The next run completed successfully in 2m44s: ingestion plus a full dbt
+build and test, 103/103 tests passed, 0 errors, with zero Duo prompts throughout.
+
 ## Selection and correction policy
 
 - Refresh the current season's complete schedule once per invocation, including future races.

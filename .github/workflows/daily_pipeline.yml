@@ -36,13 +36,6 @@ jobs:
           printf '%s' "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > "$RUNNER_TEMP/f1_pipeline_svc.p8"
           echo "SNOWFLAKE_PRIVATE_KEY_FILE=$RUNNER_TEMP/f1_pipeline_svc.p8" >> "$GITHUB_ENV"
 
-      - name: Validate private key format (no key material printed)
-        run: |
-          openssl pkey -in "$RUNNER_TEMP/f1_pipeline_svc.p8" -noout \
-            && echo "Key parses as valid PEM" \
-            || echo "Key failed to parse as PEM"
-          wc -l "$RUNNER_TEMP/f1_pipeline_svc.p8"
-
       - name: Run daily ingestion and dbt build
         run: |
           uv run --frozen python scripts/daily_pipeline.py \
