@@ -25,6 +25,8 @@ its successful login does not authenticate Python or dbt. Repeated manual retrie
 can create additional pushes. MFA token caching and unattended authentication are
 not configured. Scheduled execution will require an approved noninteractive
 authentication design; extending the timeout does not make Duo unattended.
+Verified live: a manual login with a single Duo approval now succeeds; see
+[implementation_status.md](implementation_status.md) for the LOGIN_HISTORY evidence.
 
 ## Selection and correction policy
 

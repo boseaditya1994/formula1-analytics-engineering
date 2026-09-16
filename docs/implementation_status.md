@@ -123,8 +123,14 @@ of the installed connector confirmed it applies the socket timeout while awaitin
 Duo approval, making that short timeout unsuitable for interactive MFA. Both login
 and socket timeouts have now been corrected to 180 seconds; the network retry window
 remains 60 seconds (a retry window is not a hard request deadline). This correction
-is locally tested; it has not yet been verified with a fresh live MFA login. The
-precise cause of error 370001 remains unconfirmed. See Snowflake's
+has now been verified with a fresh live MFA login: a manual `connect()` against the
+dbt profile completed successfully after a single Duo approval. `ACCOUNT_USAGE.LOGIN_HISTORY`
+showed the prior failures split into two distinct phases: repeated `EXT_AUTHN_DENIED`
+(error 390120, no second factor recorded) consistent with the socket timeout abandoning
+pending Duo approvals, followed by a run of `INTERNAL_ERROR` (error 370001) with no
+Duo attempt recorded at all — most likely transient account-level throttling from the
+rapid retry burst rather than a separate defect, since a clean login now succeeds
+under the same code with no further changes. See Snowflake's
 [timeout documentation](https://docs.snowflake.com/en/developer-guide/python-connector/python-connector-connect#managing-connection-timeouts).
 
 The new daily SQL has not yet been executed against Snowflake. The expanded RAW
