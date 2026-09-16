@@ -62,8 +62,30 @@ Setup, verified live:
 
 A live login as `F1_PIPELINE_SVC` with these three variables set (no password, no
 `SNOWFLAKE_AUTHENTICATOR` override) succeeded with zero prompts and no Duo push.
-This unblocks scheduling, but no scheduler (GitHub Actions, Task Scheduler, or
-otherwise) has been wired up yet — that remains a separate, not-yet-started step.
+
+### GitHub Actions
+
+`.github/workflows/daily_pipeline.yml` runs `scripts/daily_pipeline.py` on a daily
+cron (06:00 UTC) and on manual dispatch. It authenticates as `F1_PIPELINE_SVC` using
+key-pair auth end to end — `dbt`'s Snowflake profile also needed extending to accept
+`private_key_path`/`private_key_passphrase` (see `scripts/run_dbt.py` and
+`dbt_f1/profiles.yml.example`) since dbt previously required a password, which no
+unattended runner can supply through Duo.
+
+`.github/workflows/ci.yml` runs Ruff, the Python test suite, and an offline dbt parse
+on every pull request and push to `main`; it needs no Snowflake credentials.
+
+Required repository secrets for the daily workflow, set via `gh secret set` or the
+GitHub UI (never committed):
+
+- `SNOWFLAKE_ACCOUNT`
+- `SNOWFLAKE_USER` — `F1_PIPELINE_SVC`
+- `SNOWFLAKE_PRIVATE_KEY` — the contents of `rsa_key.p8`
+- `SNOWFLAKE_PRIVATE_KEY_PASSPHRASE` — only if the key was generated with one (this
+  project's key was generated unencrypted, so this can be left unset)
+
+`F1_PIPELINE_SVC` also needs the `F1_TRANSFORMER` role granted in Snowflake so the
+same key-pair credential covers both ingestion and dbt.
 
 ## Selection and correction policy
 

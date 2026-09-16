@@ -6,6 +6,8 @@ dbt_f1:
       account: "{{ env_var('DBT_ENV_SECRET_F1_ACCOUNT') }}"
       user: "{{ env_var('DBT_ENV_SECRET_F1_USER') }}"
       password: "{{ env_var('DBT_ENV_SECRET_F1_PASSWORD') }}"
+      private_key_path: "{{ env_var('DBT_ENV_SECRET_F1_PRIVATE_KEY_PATH') }}"
+      private_key_passphrase: "{{ env_var('DBT_ENV_SECRET_F1_PRIVATE_KEY_PASSPHRASE') }}"
       role: F1_TRANSFORMER
       database: F1_ANALYTICS
       warehouse: COMPUTE_WH

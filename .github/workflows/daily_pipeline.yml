@@ -1,0 +1,42 @@
+name: Daily pipeline
+
+on:
+  schedule:
+    # 06:00 UTC daily; races/results normally settle well before this.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      lookback-days:
+        description: "Correction lookback window in days"
+        required: false
+        default: "14"
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.9.x"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Write service-user private key
+        run: |
+          umask 077
+          printf '%s' "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > "$RUNNER_TEMP/f1_pipeline_svc.p8"
+          echo "SNOWFLAKE_PRIVATE_KEY_FILE=$RUNNER_TEMP/f1_pipeline_svc.p8" >> "$GITHUB_ENV"
+
+      - name: Run daily ingestion and dbt build
+        run: |
+          uv run --frozen python scripts/daily_pipeline.py \
+            --lookback-days "${{ github.event.inputs.lookback-days || '14' }}"
