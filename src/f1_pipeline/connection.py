@@ -51,9 +51,11 @@ def connect(profile_path: Path | None = None):
         warehouse="COMPUTE_WH",
         database="F1_ANALYTICS",
         schema="RAW",
-        login_timeout=60,
+        # Duo approval waits on the same socket as login. Short socket deadlines
+        # can abandon a pending approval and trigger another authentication request.
+        login_timeout=180,
         network_timeout=60,
-        socket_timeout=10,
+        socket_timeout=180,
         session_parameters={"QUERY_TAG": "f1_pipeline:ingestion"},
     )
     try:

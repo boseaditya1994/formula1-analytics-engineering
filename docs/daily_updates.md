@@ -18,6 +18,14 @@ The Python module entry point works where Windows Application Control blocks the
 generated `f1-pipeline` launcher. Credentials are read from the existing profile or
 environment; they are never stored in source files. COMPUTE_WH is unchanged.
 
+Interactive password login can require a fresh Duo approval per connection. The
+ingestion connector allows 180 seconds for login/socket operations so a short socket
+timeout does not prematurely abandon MFA. Snowsight has a separate browser session;
+its successful login does not authenticate Python or dbt. Repeated manual retries
+can create additional pushes. MFA token caching and unattended authentication are
+not configured. Scheduled execution will require an approved noninteractive
+authentication design; extending the timeout does not make Duo unattended.
+
 ## Selection and correction policy
 
 - Refresh the current season's complete schedule once per invocation, including future races.

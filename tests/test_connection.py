@@ -16,6 +16,9 @@ def test_profile_admin_role_is_never_used(tmp_path):
         connection = connect(profile)
         assert factory.call_args.kwargs["role"] == "F1_INGESTOR"
         assert factory.call_args.kwargs["warehouse"] == "COMPUTE_WH"
+        # Allow human MFA approval; a socket deadline must not undercut login's wait.
+        assert factory.call_args.kwargs["login_timeout"] == 180
+        assert factory.call_args.kwargs["socket_timeout"] >= 180
         connection.cursor.return_value.__enter__.return_value.execute.assert_called_once_with(
             "USE SECONDARY ROLES NONE"
         )

@@ -117,9 +117,14 @@ Implemented and locally verified:
   and propagates ingestion or dbt failure to its caller.
 - **41 Python tests passed**, Ruff passed, and git diff whitespace checks passed.
 
-Socket timeout is now explicit (10 seconds), with a 60-second login retry window
-and a 60-second query-network retry window. These are bounded client settings;
-they did not resolve the observed connectivity problem. See Snowflake's
+An initial diagnostic change set a 10-second socket timeout and 60-second login
+window. The user subsequently reported repeatedly approving Duo pushes. Inspection
+of the installed connector confirmed it applies the socket timeout while awaiting
+Duo approval, making that short timeout unsuitable for interactive MFA. Both login
+and socket timeouts have now been corrected to 180 seconds; the network retry window
+remains 60 seconds (a retry window is not a hard request deadline). This correction
+is locally tested; it has not yet been verified with a fresh live MFA login. The
+precise cause of error 370001 remains unconfirmed. See Snowflake's
 [timeout documentation](https://docs.snowflake.com/en/developer-guide/python-connector/python-connector-connect#managing-connection-timeouts).
 
 The new daily SQL has not yet been executed against Snowflake. The expanded RAW
