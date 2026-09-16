@@ -22,3 +22,4 @@ data/
 artifacts/
 .pipeline.lock
 .daily_pipeline.lock
+dashboards/tableau/data/

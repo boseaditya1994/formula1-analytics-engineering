@@ -8,7 +8,7 @@ import yaml
 from dotenv import load_dotenv
 
 
-def connect(profile_path: Path | None = None):
+def connect(profile_path: Path | None = None, *, role: str = "F1_INGESTOR", schema: str = "RAW"):
     load_dotenv(override=False)
     if profile_path:
         profiles = yaml.safe_load(profile_path.read_text(encoding="utf-8-sig")) or {}
@@ -47,10 +47,10 @@ def connect(profile_path: Path | None = None):
         raise ValueError("Snowflake account and user are required")
     connection = snowflake.connector.connect(
         **params,
-        role="F1_INGESTOR",
+        role=role,
         warehouse="COMPUTE_WH",
         database="F1_ANALYTICS",
-        schema="RAW",
+        schema=schema,
         # Duo approval waits on the same socket as login. Short socket deadlines
         # can abandon a pending approval and trigger another authentication request.
         login_timeout=180,
