@@ -28,6 +28,43 @@ authentication design; extending the timeout does not make Duo unattended.
 Verified live: a manual login with a single Duo approval now succeeds; see
 [implementation_status.md](implementation_status.md) for the LOGIN_HISTORY evidence.
 
+### Unattended authentication for scheduled runs
+
+Scheduled execution cannot approve an interactive Duo push, so it needs a separate,
+non-interactive auth path rather than a longer timeout. `connection.py` already
+supports this without code changes: `snowflake-connector-python` selects key-pair
+authentication automatically when `private_key_file` (and optionally
+`private_key_file_pwd`) is supplied instead of a password, via either
+`SNOWFLAKE_PRIVATE_KEY_FILE` / `SNOWFLAKE_PRIVATE_KEY_PASSPHRASE` or the matching
+profile fields.
+
+Setup, verified live:
+
+1. Generate an RSA key pair locally (never committed to the repo):
+   ```bash
+   openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out rsa_key.p8 -nocrypt
+   openssl rsa -in rsa_key.p8 -pubout -out rsa_key.pub
+   ```
+2. Create a dedicated service user in Snowflake — not a personal MFA-protected
+   login — scoped to `F1_INGESTOR`, and register the public key:
+   ```sql
+   create user f1_pipeline_svc default_role = F1_INGESTOR default_warehouse = COMPUTE_WH;
+   grant role F1_INGESTOR to user f1_pipeline_svc;
+   alter user f1_pipeline_svc set rsa_public_key='<rsa_key.pub, header/footer stripped>';
+   ```
+3. Store the private key outside the repo (e.g. `~/.snowflake/f1_pipeline_svc.p8`)
+   and point the pipeline at it:
+   ```bash
+   export SNOWFLAKE_ACCOUNT="<account>"
+   export SNOWFLAKE_USER="F1_PIPELINE_SVC"
+   export SNOWFLAKE_PRIVATE_KEY_FILE="$HOME/.snowflake/f1_pipeline_svc.p8"
+   ```
+
+A live login as `F1_PIPELINE_SVC` with these three variables set (no password, no
+`SNOWFLAKE_AUTHENTICATOR` override) succeeded with zero prompts and no Duo push.
+This unblocks scheduling, but no scheduler (GitHub Actions, Task Scheduler, or
+otherwise) has been wired up yet — that remains a separate, not-yet-started step.
+
 ## Selection and correction policy
 
 - Refresh the current season's complete schedule once per invocation, including future races.

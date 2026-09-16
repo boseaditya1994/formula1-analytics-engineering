@@ -133,10 +133,20 @@ rapid retry burst rather than a separate defect, since a clean login now succeed
 under the same code with no further changes. See Snowflake's
 [timeout documentation](https://docs.snowflake.com/en/developer-guide/python-connector/python-connector-connect#managing-connection-timeouts).
 
-The new daily SQL has not yet been executed against Snowflake. The expanded RAW
-coverage, live daily idempotency, and dbt tests over additional seasons remain
-unverified. The previously measured 2025 and dbt results above remain the latest
-successful data checkpoint. No daily scheduler has been enabled.
+`scripts/daily_pipeline.py` has now been run end to end against Snowflake: ingestion
+succeeded across all 2026 partitions (races, results, qualifying, sprint, both
+standings datasets), followed by a full dbt build and test — 5 incremental models,
+9 table models, 1 view model, and 103/103 data tests passed (0 errors, 0 warnings),
+including `championship_mart_reconciliation` and `reconcile_race_mart`.
+
+No daily scheduler has been enabled yet, but its authentication prerequisite is now
+resolved: scheduled runs cannot approve an interactive Duo push, so a separate
+service user (`F1_PIPELINE_SVC`, scoped to `F1_INGESTOR`) was created with Snowflake
+key-pair authentication. A live login with `SNOWFLAKE_PRIVATE_KEY_FILE` set (no
+password) succeeded with zero prompts. See
+[daily_updates.md](daily_updates.md#unattended-authentication-for-scheduled-runs)
+for setup. Wiring an actual scheduler (GitHub Actions, Task Scheduler, or similar)
+around this remains a separate, not-yet-started step.
 
 After connectivity recovers, run the two expansion commands in
 [daily_updates.md](daily_updates.md), build/test dbt, run the daily pipeline twice,
