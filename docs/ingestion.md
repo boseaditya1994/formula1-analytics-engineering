@@ -59,7 +59,10 @@ Raw connector messages and credential values are never printed. If the connectio
 is lost or the process is killed, a RUNNING audit entry can remain; investigate it
 before a restart. Repeating a completed partition is safe. A partially completed
 multi-season command can be resumed by selecting the remaining seasons/datasets.
-Automatic persisted checkpoint skipping is reserved for Phase 4.
+Pass `--resume` to skip closed-season partitions whose latest audit attempt succeeded.
+Omit it when deliberately refreshing historical corrections. Current-season partitions
+are never skipped by this flag. See [daily updates](daily_updates.md) for bounded
+correction refresh, missing-partition recovery and daily audit controls.
 
 The local file lock prevents concurrent writers in this checkout. It is not a
 distributed lock. Do not run another checkout/host against these RAW tables at the

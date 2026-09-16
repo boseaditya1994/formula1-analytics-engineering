@@ -21,3 +21,4 @@ dbt_f1/logs/
 data/
 artifacts/
 .pipeline.lock
+.daily_pipeline.lock

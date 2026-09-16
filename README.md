@@ -25,7 +25,7 @@ Use Git, uv and Python 3.12 from the repository root:
 
 ```powershell
 uv sync --frozen
-uv run --frozen f1-pipeline doctor
+uv run --frozen python -m f1_pipeline doctor
 uv run --frozen ruff check .
 uv run --frozen python -m pytest
 uv run --frozen dbt --version
@@ -37,6 +37,10 @@ so the project uses dbt Core instead of the global Fusion preview.
 The historical loader supports schedules, race results, qualifying, sprint results,
 and race-by-race driver/constructor standings. See [ingestion](docs/ingestion.md)
 for authentication, backfill commands, grains, reconciliation and recovery.
+The [daily update command](docs/daily_updates.md) selects recent corrections and
+missing race partitions, records ingestion health, and builds marts after successful
+ingestion. Its 41-test local suite passes; live daily validation is pending the
+Snowflake login timeout described in implementation status.
 
 ## Credentials and costs
 

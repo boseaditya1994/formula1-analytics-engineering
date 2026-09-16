@@ -51,9 +51,10 @@ def connect(profile_path: Path | None = None):
         warehouse="COMPUTE_WH",
         database="F1_ANALYTICS",
         schema="RAW",
-        login_timeout=20,
+        login_timeout=60,
         network_timeout=60,
-        session_parameters={"QUERY_TAG": "f1_pipeline:historical_ingestion"},
+        socket_timeout=10,
+        session_parameters={"QUERY_TAG": "f1_pipeline:ingestion"},
     )
     try:
         with connection.cursor() as cursor:

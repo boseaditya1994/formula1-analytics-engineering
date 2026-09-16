@@ -12,10 +12,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("doctor")
+    daily_parser = commands.add_parser(
+        "daily", help="Refresh current schedules and recent/gap data"
+    )
+    daily_parser.add_argument("--profile-file", type=Path)
+    daily_parser.add_argument("--lookback-days", type=int, default=14)
     historical = commands.add_parser("backfill", help="Load historical Jolpica partitions")
     historical.add_argument("--start-season", type=int, required=True)
     historical.add_argument("--end-season", type=int)
     historical.add_argument("--round", type=int)
+    historical.add_argument(
+        "--resume", action="store_true", help="Skip successful closed-season partition checkpoints"
+    )
     historical.add_argument(
         "--datasets",
         nargs="+",
@@ -42,6 +50,25 @@ def main() -> None:
         help="Explicit local dbt credential file; never printed or modified",
     )
     args = parser.parse_args()
+    if args.command == "daily":
+        from f1_pipeline.daily import daily
+
+        if not 1 <= args.lookback_days <= 90:
+            parser.error("lookback-days must be between 1 and 90")
+        try:
+            report = daily(args.profile_file, root=Path.cwd(), lookback_days=args.lookback_days)
+        except Exception as exc:
+            print(
+                json.dumps(
+                    {
+                        "status": "FAILED",
+                        "error_type": type(exc).__name__,
+                        "error_code": getattr(exc, "errno", None),
+                    }
+                )
+            )
+            raise SystemExit(1) from None
+        raise SystemExit(0 if report["status"] == "SUCCESS" else 2)
     if args.command == "backfill":
         from f1_pipeline.ingestion import backfill
 
@@ -58,6 +85,7 @@ def main() -> None:
                 args.round,
                 args.profile_file,
                 root=Path.cwd(),
+                resume=args.resume,
             )
         except Exception as exc:
             # Connector errors can contain identifiers; expose only a safe classification.

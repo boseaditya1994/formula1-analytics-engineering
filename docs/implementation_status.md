@@ -81,7 +81,7 @@ after verification passes. This verification succeeded on September 16, 2026.
 ## Remaining milestones
 
 - Historical backfill for 2018–2024 and the current season.
-- Phase 4 daily correction selection, checkpoints and ingestion freshness.
+- Live validation of daily correction selection, checkpoints and ingestion freshness.
 - Broader quality/audit reporting and analytics refinements.
 - Tableau installation, dashboard and manual publication refresh.
 - GitHub CLI, CI, scheduling, publication approval and portfolio material.
@@ -89,3 +89,44 @@ after verification passes. This verification succeeded on September 16, 2026.
 No daily scheduler, dashboard, public publication or résumé impact is claimed.
 Personal credentials/profiles stay unmodified and out of Git. The ignored local
 dbt profile contains environment references only.
+
+## Expansion and daily updates checkpoint (2026-09-16)
+
+The requested 2018–2024 expansion was attempted but each backfill command failed
+at Snowflake login, before loading a new partition. A separate connection check
+succeeded once, but subsequent ingestion attempts again failed. The final diagnostic
+identified OperationalError 250001, caused by 251011 and a socket ReadTimeout during
+login. No account/security or warehouse configuration was changed. Both Snowflake's
+web endpoint and Jolpica were reachable. Live API validation found 21 schedule rows
+for 2018 and 23 for 2026; this is source validation, not proof of a RAW backfill.
+
+After the user confirmed Snowsight SELECT 1 succeeds, the connector returned a
+different error twice: DatabaseError 370001 (08001), "Failed to connect to DB:
+Internal error", before initialization. One diagnostic included request ID
+0979031b-11e9-4185-96b4-7375e6493a62. No root cause has been established; this is
+not evidence of invalid credentials or missing project grants.
+
+Implemented and locally verified:
+
+- `backfill --resume` skips only successful closed-season partition checkpoints.
+- `daily` refreshes schedules, missing past-race datasets, the latest two races,
+  and a configurable correction window (14 days by default).
+- Empty required datasets remain PENDING and do not advance success.
+- DAILY_RUNS DDL and monitoring queries expose ingestion status and polling freshness.
+- `scripts/daily_pipeline.py` builds/tests marts only after successful ingestion,
+  and propagates ingestion or dbt failure to its caller.
+- **41 Python tests passed**, Ruff passed, and git diff whitespace checks passed.
+
+Socket timeout is now explicit (10 seconds), with a 60-second login retry window
+and a 60-second query-network retry window. These are bounded client settings;
+they did not resolve the observed connectivity problem. See Snowflake's
+[timeout documentation](https://docs.snowflake.com/en/developer-guide/python-connector/python-connector-connect#managing-connection-timeouts).
+
+The new daily SQL has not yet been executed against Snowflake. The expanded RAW
+coverage, live daily idempotency, and dbt tests over additional seasons remain
+unverified. The previously measured 2025 and dbt results above remain the latest
+successful data checkpoint. No daily scheduler has been enabled.
+
+After connectivity recovers, run the two expansion commands in
+[daily_updates.md](daily_updates.md), build/test dbt, run the daily pipeline twice,
+compare RAW counts/hashes and audit totals, then rerun incremental verification.
