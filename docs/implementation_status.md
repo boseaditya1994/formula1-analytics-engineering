@@ -1,6 +1,6 @@
 # Implementation status
 
-Last verified: 2026-09-15. Python 3.12.13, dbt Core 1.12.4, dbt-snowflake 1.12.0,
+Last verified: 2026-09-16. Python 3.12.13, dbt Core 1.12.4, dbt-snowflake 1.12.0,
 Snowflake connector 4.7.3 and existing COMPUTE_WH.
 
 ## Verified in Snowflake
@@ -26,39 +26,48 @@ All 54 recorded ingestion runs were SUCCESS. The first-race load inserted 20
 records; its rerun inserted/updated zero and reported 20 unchanged. Other seasons
 and the current season have not been backfilled.
 
-An authenticated dbt Core build completed with **8 models and 49 passing data tests**,
-zero errors/warnings, in 60.45 seconds. Its model set:
+An authenticated dbt Core build completed with **15 models and 88 passing data tests**,
+zero failures, in 59.34 seconds. Invocation: 76e4a418-51dc-4ba1-9124-3faff302c8e5.
 
-- STAGING.stg_source_records
-- MARTS.dim_driver (21 rows), dim_constructor (10), dim_circuit (24), dim_race (24)
-- MARTS.fct_race_results (479) and fct_qualifying_results (479)
-- MARTS.driver_race_performance (479)
+- One STAGING source view.
+- Six dimensions: driver, constructor, circuit, race, season and date.
+- Five incremental facts: race results, qualifying, sprint results, driver standings
+  and constructor standings.
+- Three analytical tables: race performance and driver/constructor championship progression.
 
-The build exercised fields, keys, relationships, RAW-to-fact counts, race-mart
-points/count reconciliation and business rules. Full incremental idempotency
-verification remains pending.
+Tests cover fields, keys, relationships, RAW-to-fact counts, mart reconciliation,
+grid movement and source-backed rank nullability. The earlier Snowflake connection
+errors no longer reproduce; no specific root cause was confirmed. The project uses
+the locked Core runtime and one thread. Python's 28-test suite and Ruff passed at
+the preceding checkpoint; this change modifies SQL and its dbt tests.
 
-## Current target and blocker
+An unchanged-source incremental rebuild also passed all 88 tests and rebuilt all
+15 models in 65.67 seconds. Invocation: c63ba4d7-2c91-457d-bd90-c9c0f8ff3dcf.
+Before/after row counts, distinct keys and HASH_AGG content fingerprints matched
+for every fact:
 
-The project now parses with **15 models and 87 data tests**. Added models cover
-season/date dimensions, sprint results, official championship standings and
-championship progression. Their live build did not complete.
+| Fact | Rows | Distinct keys |
+| --- | ---: | ---: |
+| Race results | 479 | 479 |
+| Qualifying results | 479 | 479 |
+| Sprint results | 120 | 120 |
+| Driver standings | 498 | 498 |
+| Constructor standings | 240 | 240 |
 
-The expanded build encountered connection error 250001 while opening workers.
-Reducing dbt to one thread produced Snowflake internal connection error
-**370001 / SQLSTATE 08001**. Independent connector checks with both ingestion
-and original-profile logins failed with the same code. This is separate from
-the earlier Codex quota/Fusion issues. No confirmed account-specific cause or
-regional incident has been established.
+The local evidence is in ignored artifacts/incremental_verification.json.
 
-The eight-model build remains the last verified cloud result. Existing views may
-have refreshed during the expanded attempt; the seven new models are not reported
-as successfully deployed. Local checks passed: 28 Python tests, Ruff, and an offline
-parse of the complete graph. The scripts use locked dbt Core, not global Fusion.
+## Source-data correction
+
+The first expanded build failed because seven driver-standing snapshots had null
+numeric position and positionText='-'. Six occurred at round 1 and one at round 2
+of 2025. The fact now preserves championship_position_text. Null numeric ranks
+are allowed only with the explicit '-' source marker; other invalid ranks fail.
+The new column was added and backfilled using MERGE with reprocess_history=true;
+no table drop or fabricated numeric ranking was used.
 
 ## Resume
 
-Once Snowflake accepts connections, run from the repository root:
+Run from the repository root:
 
 ```powershell
 uv run --frozen python scripts/run_dbt.py build --profile-file "$HOME/.dbt/profiles.yml"
@@ -67,11 +76,10 @@ uv run --frozen python scripts/verify_incremental.py --profile-file "$HOME/.dbt/
 
 The second command compares all five fact row counts, unique keys and content
 fingerprints before/after an unchanged-source build. Its report is written only
-after verification passes. That verification has not yet succeeded.
+after verification passes. This verification succeeded on September 16, 2026.
 
 ## Remaining milestones
 
-- Expanded dbt build and incremental verification.
 - Historical backfill for 2018–2024 and the current season.
 - Phase 4 daily correction selection, checkpoints and ingestion freshness.
 - Broader quality/audit reporting and analytics refinements.

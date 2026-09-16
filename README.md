@@ -56,11 +56,10 @@ The F1_ANALYTICS database, five schemas, project roles and ingestion tables are
 provisioned using COMPUTE_WH. Measured load results are recorded in
 [implementation status](docs/implementation_status.md).
 
-The 2025 backfill is verified: 1,840 RAW rows across six datasets. An authenticated
-dbt build passed for eight models and 49 data tests. The expanded 15-model target
-parses offline, but a later Snowflake backend connection error interrupted its
-live build. See [dbt execution](docs/dbt.md), [data model](docs/data_model.md), and
-[current evidence and blocker](docs/implementation_status.md).
+The 2025 backfill is verified: 1,840 RAW rows across six datasets. The authenticated
+dbt build now passes for **15 models and 88 data tests**, including official driver
+and constructor championship progression. See [dbt execution](docs/dbt.md),
+[data model](docs/data_model.md), and [validation evidence](docs/implementation_status.md).
 
 Daily scheduling, validated exports and the Tableau dashboard remain pending.
 Initial Tableau Public publication refresh will be manual.

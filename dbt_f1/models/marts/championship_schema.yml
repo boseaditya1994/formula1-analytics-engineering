@@ -39,6 +39,8 @@ models:
       - name: championship_points
         tests: [not_null]
       - name: championship_position
+        description: Numeric source rank; null when the source positionText is '-'.
+      - name: championship_position_text
         tests: [not_null]
       - name: driver_id
         tests:
