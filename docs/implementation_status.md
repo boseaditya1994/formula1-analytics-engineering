@@ -148,8 +148,7 @@ September 17 through September 21, each performing ingestion followed by dbt bui
 and test. CI also passes on pushes, with Ruff and the 42-test Python suite green.
 
 The Tableau Public workbook
-`dashboards/tableau/F1_Analytics_Engineering_Platform.twb` is complete and has been
-published. It delivers Championship Monitor, Champs Behind The Wheel, Race Analysis,
+`dashboards/tableau/F1_Analytics_Engineering_Platform.twb` is complete and [published](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>). It delivers Championship Monitor, Champs Behind The Wheel, Race Analysis,
 Race Winners and Team Detail Analysis dashboards from the exported analytics marts.
 Tableau Public uses generated CSV extracts rather than a live Snowflake connection;
 the warehouse refreshes daily, while the public workbook is refreshed by exporting

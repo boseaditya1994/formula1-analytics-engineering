@@ -2,7 +2,7 @@
 
 ## Delivered workbook
 
-The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](../dashboards/tableau/F1_Analytics_Engineering_Platform.twb) and has been published to Tableau Public. It contains five interactive dashboards backed only by the exported mart fields:
+The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](../dashboards/tableau/F1_Analytics_Engineering_Platform.twb) and is published on [Tableau Public](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>). It contains five interactive dashboards backed only by the exported mart fields:
 
 1. **Championship Monitor** — driver standings, championship progression, race points and key driver KPIs.
 2. **Champs Behind The Wheel** — driver-focused season progression and race-by-race performance.
