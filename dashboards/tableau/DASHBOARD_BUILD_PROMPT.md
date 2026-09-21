@@ -114,6 +114,32 @@ CONSTRUCTOR_NAME, CIRCUIT_NAME, COUNTRY, POINTS — one row per race win, filter
 SEASON — like the reference's "Season Wise Results." This tab is the closest match to
 the reference dashboard since it needs nothing beyond race results.
 
+## Design system (apply to every tab)
+
+Dark, F1-broadcast look, using only these colors (from the user's formula1.com palette):
+
+- Dashboard background #181820; panel/card background #2C2C33; panel borders #404040
+- Primary text #F3F3F4; secondary text and axis labels #AAAAAA; gridlines #404040 (thin, subtle)
+- Brand accent: F1 red #E10600, used for titles' underline, the selected item, and the leading series
+- Gold #FFD100 only for wins/podium highlights; teal #27F4D2 for a secondary highlight or "gained"
+- Positions gained/lost: use the "F1 Diverging Loss-Gain" palette (red = lost, teal = gained), not red/green
+- Multi-series lines (constructors/drivers): use "F1 Categorical"; limit visible series to the top 5-6 and gray the rest (#606066)
+- Sequential values (race counts, averages): use "F1 Sequential Red"
+
+Import the palettes first: copy dashboards\tableau\f1_palettes.tps to
+Documents\My Tableau Public Repository\Preferences.tps (if a Preferences.tps already exists, merge the
+three <color-palette> blocks into it rather than overwriting), then restart Tableau Public.
+
+Layout rules: one title per tab in bold white, left-aligned, 24pt, with a short red underline;
+a KPI strip of 3-4 large numbers (white, 28-36pt, gray label beneath) at the top of tabs 1, 3, 4;
+consistent 16px padding between panels; no chart borders, no 3D, no default Tableau blue;
+remove redundant axis titles, gridlines on the x-axis, and legends that duplicate direct labels;
+label lines directly at their end point instead of using a legend where possible; tooltips
+formatted with the same fonts (Tableau Book or Benton Sans).
+
+Do not use the Formula 1 logo, official wordmarks, or team logos anywhere in the workbook.
+A plain text title is fine. This will be published publicly.
+
 ## Rules
 
 - Show me each tab after building it before moving to the next.
