@@ -154,3 +154,24 @@ Tableau Public uses generated CSV extracts rather than a live Snowflake connecti
 the warehouse refreshes daily, while the public workbook is refreshed by exporting
 and manually republishing it. See [dashboard.md](dashboard.md) for the supported
 fields and refresh process.
+
+## Historical expansion and race-week refresh (2026-09-21)
+
+The resumable 2018–2024 backfill completed successfully. Latest audit checkpoints are
+all `SUCCESS`: 46 partitions for 2018, 46 for 2019, 38 for 2020, 48 for 2021, 48 for
+2022, 48 for 2023 and 52 for 2024. A transient Jolpica `RemoteProtocolError` during
+the first 2022 attempt was retried through `--resume`; no successful partition was
+reloaded. RAW now contains 11,050 historical records and 11,050 distinct
+dataset/business keys for these seasons.
+
+A one-time dbt historical reprocess added `championship_position_text` to constructor
+standings, preserving two source-provided unranked Haas snapshots (`positionText='-'`)
+from 2018 and 2020 instead of fabricating numeric ranks. The subsequent Snowflake dbt
+build completed with 15 models and 89 data tests: **104/104 passed**.
+
+`.github/workflows/race_week_pipeline.yml` is now implemented. It runs twice hourly
+Friday–Sunday UTC, is manually dispatchable, shares writer concurrency with the daily
+pipeline, and refreshes only one imminent/current race's qualifying, sprint where
+scheduled, results, and championship standings. Its local live check outside an
+active race window completed successfully as a no-op; source publication remains
+observable as `PENDING`. See [race_week.md](race_week.md).

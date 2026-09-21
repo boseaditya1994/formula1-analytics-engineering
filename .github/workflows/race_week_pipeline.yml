@@ -1,18 +1,13 @@
-name: Daily pipeline
+name: Race-week pipeline
 
 on:
   schedule:
-    # 06:00 UTC daily; races/results normally settle well before this.
-    - cron: "0 6 * * *"
+    # Friday through Sunday, twice per hour and offset from top-of-hour Actions load.
+    - cron: "17,47 * * * 5,6,0"
   workflow_dispatch:
-    inputs:
-      lookback-days:
-        description: "Correction lookback window in days"
-        required: false
-        default: "14"
 
 jobs:
-  daily:
+  race-week:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
@@ -39,7 +34,5 @@ jobs:
           printf '%s' "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > "$RUNNER_TEMP/f1_pipeline_svc.p8"
           echo "SNOWFLAKE_PRIVATE_KEY_FILE=$RUNNER_TEMP/f1_pipeline_svc.p8" >> "$GITHUB_ENV"
 
-      - name: Run daily ingestion and dbt build
-        run: |
-          uv run --frozen python scripts/daily_pipeline.py \
-            --lookback-days "${{ github.event.inputs.lookback-days || '14' }}"
+      - name: Refresh current race and build marts when source data is published
+        run: uv run --frozen python scripts/race_week_pipeline.py

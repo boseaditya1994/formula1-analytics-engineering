@@ -64,11 +64,11 @@ snapshot has null change metrics. Later deltas may include penalties/corrections
 they are not assumed to equal race points alone. Sprint points stay separate from
 Grand Prix points. Qualifying rank is not assumed to equal the starting grid.
 
-The source leaves numeric driver championship position null for some snapshots and
-sets positionText to '-'. Keep the numeric rank null and retain the source marker
-as championship_position_text. Tests allow null ranks only with this explicit marker.
-Rank movement involving an unranked snapshot is null. The 2025 load contains seven
-such snapshots; they must not be discarded or assigned invented numeric ranks.
+The source can leave numeric driver or constructor championship position null and set
+positionText to '-'. Keep the numeric rank null and retain the source marker as
+championship_position_text. Tests allow null ranks only with this explicit marker.
+Rank movement involving an unranked snapshot is null. These snapshots must not be
+discarded or assigned invented numeric ranks.
 
 When introducing the position-text column, the driver standings model supports
 `--vars '{"reprocess_history": true}'` to repopulate existing keys via MERGE without

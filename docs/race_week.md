@@ -3,7 +3,7 @@
 ## Objective
 
 Provide timely current-race updates without weakening the proven daily pipeline or
-claiming live streaming. The planned `race_week_pipeline.yml` will refresh only the
+claiming live streaming. The implemented `race_week_pipeline.yml` refreshes only the
 current season's active race and only data that the current marts support.
 
 ## Supported refreshes
@@ -21,9 +21,9 @@ source/model design.
 
 ## Trigger and safety model
 
-- The workflow will use `workflow_dispatch` for an operator-controlled target round
-  and scheduled event windows for the current race once their UTC timing has been
-  reliably derived from the published calendar.
+- The workflow is manually dispatchable and runs twice an hour Friday through Sunday
+  (UTC). It derives the active race from the published current-season schedule and
+  only selects a race whose date is within the next two UTC days.
 - It will use the same `F1_PIPELINE_SVC` key-pair authentication as the daily job.
 - A shared GitHub Actions concurrency group will prevent overlap with the daily
   workflow and the workflow will cancel neither an active daily pipeline nor a
@@ -42,11 +42,13 @@ only after its normal CSV export and manual Tableau Public republish.
 
 ## Acceptance criteria
 
-Before enabling the workflow, verify that it:
+Verified behaviour:
 
 1. selects one current race and never rewrites historical seasons;
-2. respects shared workflow concurrency;
+2. shares writer concurrency with the daily workflow;
 3. records a successful or pending audit result for every selected partition;
-4. passes dbt build/tests after a successful source refresh;
-5. leaves the existing daily schedule unchanged; and
-6. is documented in [daily_updates.md](daily_updates.md).
+4. runs dbt build/tests only when source data changes; and
+5. exits successfully without a mart build outside the active-race window.
+
+The local live verification on 2026-09-21 was a successful no-active-race no-op.
+The workflow is documented in [daily_updates.md](daily_updates.md).

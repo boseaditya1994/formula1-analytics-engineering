@@ -17,6 +17,12 @@ def main() -> None:
     )
     daily_parser.add_argument("--profile-file", type=Path)
     daily_parser.add_argument("--lookback-days", type=int, default=14)
+    race_week_parser = commands.add_parser(
+        "race-week", help="Refresh published data for the imminent/current race only"
+    )
+    race_week_parser.add_argument("--profile-file", type=Path)
+    race_week_parser.add_argument("--season", type=int, default=datetime.now(UTC).year)
+    race_week_parser.add_argument("--window-days", type=int, default=2)
     historical = commands.add_parser("backfill", help="Load historical Jolpica partitions")
     historical.add_argument("--start-season", type=int, required=True)
     historical.add_argument("--end-season", type=int)
@@ -69,6 +75,23 @@ def main() -> None:
             )
             raise SystemExit(1) from None
         raise SystemExit(0 if report["status"] == "SUCCESS" else 2)
+    if args.command == "race-week":
+        from f1_pipeline.race_week import race_week
+
+        if not 0 <= args.window_days <= 3:
+            parser.error("window-days must be between 0 and 3")
+        try:
+            report = race_week(
+                args.profile_file,
+                root=Path.cwd(),
+                season=args.season,
+                window_days=args.window_days,
+            )
+        except Exception as exc:
+            print(json.dumps({"status": "FAILED", "error_type": type(exc).__name__}))
+            raise SystemExit(1) from None
+        print(json.dumps(report), flush=True)
+        raise SystemExit(0 if report["status"] in ("SUCCESS", "PARTIAL") else 2)
     if args.command == "backfill":
         from f1_pipeline.ingestion import backfill
 

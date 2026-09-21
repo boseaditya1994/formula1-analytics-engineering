@@ -21,10 +21,12 @@ flowchart LR
 
 | Metric | Verified result |
 | --- | --- |
+| Historical 2018–2024 backfill | 11,050 RAW records with 11,050 distinct dataset/business keys across six source datasets |
 | Historical 2025 backfill | 1,840 RAW records across six source datasets |
-| Python quality gate | 42 tests passing; Ruff clean |
-| dbt quality gate | 103/103 data tests passing in a full Snowflake build |
+| Python quality gate | 47 tests passing; Ruff clean |
+| dbt quality gate | 104/104 data tests passing in a full Snowflake build |
 | Daily automation | GitHub Actions at 06:00 UTC using key-pair auth, with consecutive successful scheduled runs |
+| Race-week automation | Separate current-race workflow, scheduled twice hourly Friday–Sunday UTC and manually dispatchable |
 | Tableau delivery | Five published dashboards: Championship Monitor, Champs Behind The Wheel, Race Analysis, Race Winners and Team Detail Analysis |
 
 Daily ingestion, incremental dbt build and reconciliation use the scoped service user
@@ -66,8 +68,8 @@ Copy `.env.example` to `.env` for local configuration. Never commit passwords, t
 
 ## Current scope and next enhancements
 
-The engineering platform, daily automation, and Tableau dashboard are delivered.
-The 2018–2024 historical backfill is in progress. See [architecture](docs/architecture.md)
-and the [race-week refresh design](docs/race_week.md) for planned current-race updates.
+The engineering platform, daily automation, historical 2018–2025 coverage, race-week
+automation, and Tableau dashboard are delivered. See [architecture](docs/architecture.md)
+and the [race-week refresh design](docs/race_week.md) for current-race scope and limits.
 Tableau refresh automation beyond the free-tier manual republish workflow and portfolio
 résumé/LinkedIn material remain future enhancements.

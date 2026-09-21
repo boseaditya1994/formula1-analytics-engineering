@@ -87,6 +87,20 @@ GitHub UI (never committed):
 `F1_PIPELINE_SVC` also needs the `F1_TRANSFORMER` role granted in Snowflake so the
 same key-pair credential covers both ingestion and dbt.
 
+### Race-week refresh
+
+`.github/workflows/race_week_pipeline.yml` is intentionally separate from the daily
+baseline. It runs twice an hour from Friday through Sunday (UTC), selects only the
+imminent/current race within a two-day window, and requests qualifying, sprint where
+scheduled, results, and both championship standings. It records unpublished source
+results as `PENDING`; a no-active-race or no-published-data run is a successful,
+observable no-op. When at least one supported partition is published, it runs the
+same dbt build/test gate as the daily job.
+
+Both writer workflows share the `f1-snowflake-writer` concurrency group, so neither
+cancels or overlaps the other. This is near-real-time race-week ingestion, not live
+timing or streaming. See [race_week.md](race_week.md) for the scope and limitations.
+
 Verified live via `gh workflow run daily_pipeline.yml`: the first attempt failed in
 under 2 seconds with a bare `ValueError`, too fast to be a real Snowflake round trip.
 A temporary debug step confirmed the written key file was empty (`wc -l` returned 0)
