@@ -19,12 +19,16 @@ flowchart LR
 
 ## What is verified
 
-- Historical 2025 backfill: **1,840 RAW records** across six source datasets.
-- Daily ingestion, incremental dbt build, and reconciliation run automatically at **06:00 UTC** through GitHub Actions using Snowflake key-pair authentication — no interactive Duo approval is required.
-- The scheduled workflow has completed successfully on consecutive daily runs.
-- **42 Python tests** and Ruff lint pass locally.
-- A full Snowflake dbt build has completed with **103/103 data tests passing**.
-- The Tableau Public workbook contains five dashboards: Championship Monitor, Champs Behind The Wheel, Race Analysis, Race Winners, and Team Detail Analysis.
+| Metric | Verified result |
+| --- | --- |
+| Historical 2025 backfill | 1,840 RAW records across six source datasets |
+| Python quality gate | 42 tests passing; Ruff clean |
+| dbt quality gate | 103/103 data tests passing in a full Snowflake build |
+| Daily automation | GitHub Actions at 06:00 UTC using key-pair auth, with consecutive successful scheduled runs |
+| Tableau delivery | Five published dashboards: Championship Monitor, Champs Behind The Wheel, Race Analysis, Race Winners and Team Detail Analysis |
+
+Daily ingestion, incremental dbt build and reconciliation use the scoped service user
+without interactive Duo approval.
 
 ## Tableau Public delivery
 
@@ -62,4 +66,8 @@ Copy `.env.example` to `.env` for local configuration. Never commit passwords, t
 
 ## Current scope and next enhancements
 
-The engineering platform, daily automation, and Tableau dashboard are delivered. Historical expansion for 2018–2024, Tableau refresh automation beyond the free-tier manual republish workflow, and portfolio résumé/LinkedIn material remain future enhancements.
+The engineering platform, daily automation, and Tableau dashboard are delivered.
+The 2018–2024 historical backfill is in progress. See [architecture](docs/architecture.md)
+and the [race-week refresh design](docs/race_week.md) for planned current-race updates.
+Tableau refresh automation beyond the free-tier manual republish workflow and portfolio
+résumé/LinkedIn material remain future enhancements.
