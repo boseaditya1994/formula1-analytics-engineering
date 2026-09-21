@@ -1,6 +1,6 @@
 # Implementation status
 
-Last verified: 2026-09-16. Python 3.12.13, dbt Core 1.12.4, dbt-snowflake 1.12.0,
+Last verified: 2026-09-21. Python 3.12.13, dbt Core 1.12.4, dbt-snowflake 1.12.0,
 Snowflake connector 4.7.3 and existing COMPUTE_WH.
 
 ## Verified in Snowflake
@@ -80,13 +80,12 @@ after verification passes. This verification succeeded on September 16, 2026.
 
 ## Remaining milestones
 
-- Historical backfill for 2018–2024 and the current season.
-- Live validation of daily correction selection, checkpoints and ingestion freshness.
+- Historical expansion for 2018–2024.
 - Broader quality/audit reporting and analytics refinements.
-- Tableau installation, dashboard and manual publication refresh.
-- GitHub CLI, CI, scheduling, publication approval and portfolio material.
+- Tableau Public refresh automation beyond the documented manual export-and-republish
+  process available on the free/extract-only workflow.
+- Portfolio screenshots, résumé and LinkedIn material.
 
-No daily scheduler, dashboard, public publication or résumé impact is claimed.
 Personal credentials/profiles stay unmodified and out of Git. The ignored local
 dbt profile contains environment references only.
 
@@ -139,15 +138,20 @@ standings datasets), followed by a full dbt build and test — 5 incremental mod
 9 table models, 1 view model, and 103/103 data tests passed (0 errors, 0 warnings),
 including `championship_mart_reconciliation` and `reconcile_race_mart`.
 
-No daily scheduler has been enabled yet, but its authentication prerequisite is now
-resolved: scheduled runs cannot approve an interactive Duo push, so a separate
-service user (`F1_PIPELINE_SVC`, scoped to `F1_INGESTOR`) was created with Snowflake
-key-pair authentication. A live login with `SNOWFLAKE_PRIVATE_KEY_FILE` set (no
-password) succeeded with zero prompts. See
-[daily_updates.md](daily_updates.md#unattended-authentication-for-scheduled-runs)
-for setup. Wiring an actual scheduler (GitHub Actions, Task Scheduler, or similar)
-around this remains a separate, not-yet-started step.
+## Automation and dashboard delivery (2026-09-21)
 
-After connectivity recovers, run the two expansion commands in
-[daily_updates.md](daily_updates.md), build/test dbt, run the daily pipeline twice,
-compare RAW counts/hashes and audit totals, then rerun incremental verification.
+GitHub Actions now runs the daily pipeline at 06:00 UTC and supports manual
+dispatch. It authenticates as the scoped `F1_PIPELINE_SVC` service user using
+Snowflake key-pair authentication, so scheduled runs require no interactive Duo
+approval. The workflow has completed successfully on consecutive scheduled runs from
+September 17 through September 21, each performing ingestion followed by dbt build
+and test. CI also passes on pushes, with Ruff and the 42-test Python suite green.
+
+The Tableau Public workbook
+`dashboards/tableau/F1_Analytics_Engineering_Platform.twb` is complete and has been
+published. It delivers Championship Monitor, Champs Behind The Wheel, Race Analysis,
+Race Winners and Team Detail Analysis dashboards from the exported analytics marts.
+Tableau Public uses generated CSV extracts rather than a live Snowflake connection;
+the warehouse refreshes daily, while the public workbook is refreshed by exporting
+and manually republishing it. See [dashboard.md](dashboard.md) for the supported
+fields and refresh process.

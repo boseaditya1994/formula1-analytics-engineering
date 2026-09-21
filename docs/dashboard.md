@@ -1,74 +1,48 @@
 # Dashboard
 
+## Delivered workbook
+
+The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](../dashboards/tableau/F1_Analytics_Engineering_Platform.twb) and has been published to Tableau Public. It contains five interactive dashboards backed only by the exported mart fields:
+
+1. **Championship Monitor** — driver standings, championship progression, race points and key driver KPIs.
+2. **Champs Behind The Wheel** — driver-focused season progression and race-by-race performance.
+3. **Race Analysis** — grid versus finish, points, finishing status and circuit context.
+4. **Race Winners** — race-level winners and points across the selected season.
+5. **Team Detail Analysis** — constructor comparison, team points history, wins and podium KPIs.
+
+No telemetry, lap-time or pit-stop metrics are claimed: those entities are not in the current marts.
+
 ## Tool choice: Tableau Public Desktop
 
-Tableau Public Desktop over Power BI Desktop, on this Windows machine, because Tableau
-Public is designed for free, no-login public hosting with a shareable profile link —
-the standard recruiter-facing choice for a portfolio project. Power BI's free-tier
-"Publish to Web" requires a Microsoft account and is a weaker public-sharing story for
-this use case. Neither tool was installed at the time this decision was made; the user
-installed Tableau Public Desktop manually (GUI installs and dashboard authoring are
-outside this session's automation reach — no desktop-control tool is available here).
+Tableau Public Desktop was selected over Power BI because it provides free public hosting with a shareable portfolio workbook. The workbook was authored and published manually in Tableau Public Desktop.
 
-## Known limitation: extract-only, no live Snowflake connection
+## Extract-only refresh model
 
-Tableau Public Desktop cannot authenticate to a private Snowflake account — it only
-works with data extracts (`.hyper`) or flat files, by design, since published
-workbooks are public. This means:
+Tableau Public cannot use a live connection to the private Snowflake account. It consumes local CSV extracts instead:
 
-- The dashboard cannot show a live Snowflake connection or refresh itself against the
-  warehouse automatically.
-- `scripts/export_dashboard_data.py` queries the marts and writes CSV extracts locally.
-  Those CSVs are the actual data Tableau loads.
-- "Daily refresh" for this dashboard means re-running the export script and
-  republishing the workbook — not an automatic pull. This is an honest limitation of
-  the free tool choice, not a gap in the pipeline itself (Snowflake marts refresh
-  daily via GitHub Actions regardless; only the published Tableau Public workbook
-  needs a manual republish to reflect that).
+- `scripts/export_dashboard_data.py` reads SELECT-only from `F1_ANALYTICS.MARTS` using `F1_BI_READER`.
+- The script writes the three CSV extracts consumed by Tableau to `dashboards/tableau/data/`.
+- GitHub Actions refreshes Snowflake ingestion and marts daily at 06:00 UTC.
+- To refresh the published dashboard, rerun the export and manually republish the Tableau workbook. This is an intentional, documented free-tier limitation.
 
 ## Data export
 
-```bash
-uv run --frozen python scripts/export_dashboard_data.py --profile-file "$HOME/.dbt/profiles.yml"
+```powershell
+uv run --frozen python scripts/export_dashboard_data.py
 ```
 
-Reads with the `F1_BI_READER` role (`snowflake/setup/02_roles.sql`) — SELECT-only on
-`F1_ANALYTICS.MARTS`, granted to a user via:
+The export contains:
+
+- `driver_race_performance.csv` — driver × race; grid/finish, points, status, circuit and country.
+- `driver_championship_progression.csv` — driver × race; championship position/points and deltas.
+- `constructor_championship_progression.csv` — constructor × race; championship position/points and deltas.
+
+The exports were verified live against Snowflake: 787, 809 and 394 rows respectively. The files are intentionally gitignored and regenerated on demand.
+
+## Security
+
+`F1_BI_READER` is a SELECT-only role on `F1_ANALYTICS.MARTS`. Grant it to an authorised export user with:
 
 ```sql
 grant role F1_BI_READER to user <user>;
 ```
-
-Writes three CSVs to `dashboards/tableau/data/` (gitignored, regenerated on demand):
-
-- `driver_race_performance.csv` — one row per driver per race, with circuit and
-  country, grid/finish positions, points, status. Grain: driver × race.
-- `driver_championship_progression.csv` — one row per driver per race, championship
-  position/points after that race, and race-over-race deltas. Grain: driver × race.
-- `constructor_championship_progression.csv` — the same shape at constructor grain.
-
-Verified live against Snowflake: 787 / 809 / 394 rows respectively, columns and values
-spot-checked (e.g. Lando Norris, McLaren, Albert Park Grand Prix Circuit for the 2025
-season opener).
-
-## Dashboard pages (planned)
-
-Scoped to what the exported data actually supports — no page requires a metric the
-marts don't have:
-
-1. **Driver Championship** — points/position progression by season, filterable by
-   driver and season, from `driver_championship_progression.csv`.
-2. **Constructor Championship** — same, from `constructor_championship_progression.csv`.
-3. **Race Analysis** — grid vs. finish, positions gained/lost, DNFs, by race and
-   circuit, from `driver_race_performance.csv`.
-4. **Circuit Analysis** — performance by circuit/country, from the same file's
-   `circuit_name`/`country` columns.
-
-Pages such as pit-stop analytics or lap-time trends are intentionally out of scope:
-the current marts don't include `fct_lap_times`/`fct_pit_stops`, and this doc will not
-claim a page that isn't backed by real data.
-
-## Status
-
-Data export pipeline built and verified. Workbook authoring in Tableau Public Desktop
-is a manual, GUI-driven step — not yet done as of this writing.
