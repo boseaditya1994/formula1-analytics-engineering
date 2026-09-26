@@ -6,7 +6,7 @@ The project uses two complementary dashboard surfaces:
 
 - **React interactive dashboard (primary showcase):** the implemented polished,
   responsive `dashboards/react` application. It reads curated MARTS data through an
-  approved public/static export. Its first public data deployment is pending.
+  approved public/static export and is live on [GitHub Pages](https://boseaditya1994.github.io/formula1-analytics-engineering/).
 - **Tableau Public (published companion BI artifact):** the verified workbook that
   demonstrates conventional BI delivery, exploratory analysis, and public sharing.
 

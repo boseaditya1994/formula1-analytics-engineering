@@ -28,3 +28,22 @@ jobs:
 
       - name: dbt compile (offline)
         run: uv run --frozen python scripts/run_dbt.py parse --offline
+
+  react-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dashboards/react
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dashboards/react/package-lock.json
+
+      - name: Build React dashboard
+        run: npm ci && npm run build
