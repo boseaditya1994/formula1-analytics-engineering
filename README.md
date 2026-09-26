@@ -45,6 +45,10 @@ directly to Snowflake. The `Publish React dashboard` workflow regenerates those
 extracts after successful daily or race-week runs and deploys the static site to
 GitHub Pages.
 
+Its current views cover championship overview, driver progression, driver
+head-to-head, race analysis, constructor detail, circuit trends, and historical
+season comparison.
+
 ### Tableau Public: published companion BI artifact
 
 The finished workbook is [F1_Analytics_Engineering_Platform.twb](dashboards/tableau/F1_Analytics_Engineering_Platform.twb). Explore the published [Tableau Public dashboard](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>).

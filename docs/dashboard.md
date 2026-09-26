@@ -36,6 +36,22 @@ extracts using the service user's private key only on the GitHub-hosted runner, 
 the static React export, and deploys `dist/client` to GitHub Pages. The deployed
 artifact contains only browser assets and the three approved CSV extracts.
 
+## React analytical views
+
+The primary dashboard uses only the approved public extracts and now includes:
+
+1. **Overview** — current season KPIs, points awarded by round, and standings.
+2. **Driver trend** — one driver's championship points and rank progression.
+3. **Head-to-head** — two-driver cumulative points comparison by round.
+4. **Race analysis** — round-level classified results, grid movement, and points.
+5. **Constructor detail** — a constructor's season points progression.
+6. **Circuit trends** — a selected driver's points and average finish by circuit.
+7. **Historical season comparison** — side-by-side season coverage, points awarded, and most-win driver.
+
+These views are descriptive analytics over the published extracts, not live timing or
+predictive analysis. The React project deliberately has a minimal dependency set:
+React, Recharts, Vinext/Vite, TypeScript, Tailwind, ESLint, and their build-time types.
+
 ## Delivered companion workbook
 
 The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](../dashboards/tableau/F1_Analytics_Engineering_Platform.twb) and is published on [Tableau Public](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>). It contains five interactive dashboards backed only by the exported mart fields:
