@@ -52,13 +52,23 @@ def main() -> None:
         type=Path,
         default=Path(__file__).resolve().parents[1] / "dashboards" / "tableau" / "data",
     )
+    parser.add_argument(
+        "--react-out-dir",
+        type=Path,
+        help="Optional public static-data directory for the React dashboard.",
+    )
     args = parser.parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    output_dirs = [args.out_dir]
+    if args.react_out_dir:
+        output_dirs.append(args.react_out_dir)
+    for out_dir in output_dirs:
+        out_dir.mkdir(parents=True, exist_ok=True)
     connection = connect(args.profile_file, role="F1_BI_READER", schema="MARTS")
     try:
         for name, sql in QUERIES.items():
-            count = export(connection, name, sql, args.out_dir)
-            print(f"{name}: {count} rows -> {args.out_dir / (name + '.csv')}")
+            for out_dir in output_dirs:
+                count = export(connection, name, sql, out_dir)
+                print(f"{name}: {count} rows -> {out_dir / (name + '.csv')}")
     finally:
         connection.close()
 

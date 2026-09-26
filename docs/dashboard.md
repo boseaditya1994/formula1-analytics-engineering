@@ -1,6 +1,34 @@
-# Dashboard
+# Dashboard delivery
 
-## Delivered workbook
+## Product positioning
+
+The project uses two complementary dashboard surfaces:
+
+- **React interactive dashboard (primary showcase):** the implemented polished,
+  responsive `dashboards/react` application. It reads curated MARTS data through an
+  approved public/static export. Its first public data deployment is pending.
+- **Tableau Public (published companion BI artifact):** the verified workbook that
+  demonstrates conventional BI delivery, exploratory analysis, and public sharing.
+
+React must never connect from the browser directly to Snowflake or expose Snowflake
+credentials. Tableau remains an intentional companion artifact rather than being
+described as the future primary visual experience.
+
+## React static-export delivery
+
+The React app retrieves three public CSV files from `/data/` at runtime. The export
+script is the only path that accesses Snowflake and always uses the scoped,
+SELECT-only `F1_BI_READER` role. Generate both Tableau and React extracts with:
+
+```powershell
+uv run --frozen python scripts/export_dashboard_data.py --react-out-dir dashboards/react/public/data
+```
+
+The generated React files are gitignored. They are public presentation data and must
+be reviewed before a dashboard deployment; no Snowflake credential, private key, or
+profile is copied into the React project or browser bundle.
+
+## Delivered companion workbook
 
 The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](../dashboards/tableau/F1_Analytics_Engineering_Platform.twb) and is published on [Tableau Public](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>). It contains five interactive dashboards backed only by the exported mart fields:
 
@@ -12,7 +40,7 @@ The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](
 
 No telemetry, lap-time or pit-stop metrics are claimed: those entities are not in the current marts.
 
-## Tool choice: Tableau Public Desktop
+## Why Tableau Public remains included
 
 Tableau Public Desktop was selected over Power BI because it provides free public hosting with a shareable portfolio workbook. The workbook was authored and published manually in Tableau Public Desktop.
 

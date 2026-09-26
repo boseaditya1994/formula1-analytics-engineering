@@ -24,3 +24,5 @@ artifacts/
 .daily_pipeline.lock
 .race_week_pipeline.lock
 dashboards/tableau/data/
+dashboards/react/public/data/
+.npm-cache/

@@ -5,7 +5,8 @@ Status: accepted.
 ## Context
 
 Snowflake marts refresh daily through GitHub Actions, while Tableau Public is an
-extract-based public delivery channel for this project.
+extract-based companion BI delivery channel for this project. The React dashboard uses
+the same controlled data-export boundary, but its public extract publication is pending.
 
 ## Decision
 
@@ -15,7 +16,10 @@ CSV extracts, and republish it.
 
 ## Consequences
 
-Warehouse analytics remain current daily. The public dashboard can lag until its next
-manual republish; this is disclosed rather than described as automatic dashboard
-refresh. Automating publication would require a separately approved tool, credential
-model and review of Tableau Public capabilities and terms.
+Warehouse analytics remain current daily. The Tableau companion artifact can lag until
+its next manual republish; this is disclosed rather than described as automatic
+dashboard refresh. React is implemented with an approved static-export design; its
+future automated publication requires an approved data-delivery and hosting workflow.
+Automating Tableau publication would
+require a separately approved tool, credential model and review of Tableau Public
+capabilities and terms.

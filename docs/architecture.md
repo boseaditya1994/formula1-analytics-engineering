@@ -16,7 +16,8 @@ flowchart LR
     I --> M[(MARTS: dimensions, facts, analytics)]
     P --> A[(AUDIT: partition and daily runs)]
     M --> E[CSV dashboard export]
-    E --> T[Tableau Public]
+    E --> T[Tableau Public companion BI]
+    M -. approved static export .-> W[React dashboard primary showcase]
     G[GitHub Actions] --> P
     G --> S
 ```
@@ -32,7 +33,8 @@ flowchart LR
 4. dbt tests and custom reconciliations prevent an invalid mart refresh from being
    reported as successful.
 5. The dashboard export reads only from MARTS with `F1_BI_READER` and creates local
-   CSV extracts for Tableau Public.
+   CSV extracts for the Tableau Public companion artifact. The React showcase consumes
+   separately generated approved static exports, never direct browser-to-Snowflake access.
 
 ## Runtime paths
 
@@ -40,8 +42,9 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | Daily pipeline | GitHub Actions, 06:00 UTC | Current-season schedule, missing partitions, recent corrections | `F1_PIPELINE_SVC` key pair | Ingestion + dbt build/test |
 | Historical backfill | Explicit command | Requested closed seasons and datasets | `F1_PIPELINE_SVC` key pair or approved local profile | Resumable RAW coverage |
-| Race-week pipeline | Planned separate workflow | Current race only; qualifying, sprint, results and standings after source publication | `F1_PIPELINE_SVC` key pair | Bounded near-real-time refresh |
-| Tableau refresh | Manual after export | Published CSV extracts | `F1_BI_READER` | Updated Tableau Public workbook |
+| Race-week pipeline | GitHub Actions, Friday–Sunday UTC and manual dispatch | Current race only; qualifying, sprint, results and standings after source publication | `F1_PIPELINE_SVC` key pair | Bounded near-real-time refresh |
+| Tableau companion BI refresh | Manual after export | Published CSV extracts | `F1_BI_READER` | Updated Tableau Public workbook |
+| React dashboard | Implemented; initial public extract pending | Curated MARTS data through approved static export | No browser credential | Polished interactive showcase |
 
 ## Security and cost controls
 
@@ -52,6 +55,8 @@ flowchart LR
   dashboard-export permissions.
 - The project uses the existing `COMPUTE_WH` warehouse and avoids continuous compute.
 - Tableau Public receives extracts, never a live private Snowflake credential.
+- The React browser client likewise never receives Snowflake credentials
+  or query the private account directly.
 
 ## Operational boundaries
 

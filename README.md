@@ -1,6 +1,6 @@
 # Formula 1 Analytics Engineering Platform
 
-An automated Formula 1 analytics platform built with Python, Snowflake, dbt, GitHub Actions, and Tableau Public. It ingests current race data, incrementally loads and models it in Snowflake, validates it with automated quality and reconciliation checks, and delivers a published Tableau Public dashboard.
+An automated Formula 1 analytics platform built with Python, Snowflake, dbt, GitHub Actions, and Tableau Public. It ingests current race data, incrementally loads and models it in Snowflake, and validates it with automated quality and reconciliation checks. Tableau Public is the published companion BI artifact; a React dashboard is the planned primary polished interactive showcase.
 
 ## Architecture
 
@@ -13,6 +13,7 @@ flowchart LR
     INT --> MART[(Dimensions, facts and analytics marts)]
     MART --> CSV[Validated CSV exports]
     CSV --> BI[Published Tableau Public workbook]
+    MART -. planned read-only API/export .-> REACT[React interactive dashboard]
     GHA[GitHub Actions daily schedule] --> PY
     PY --> AUDIT[(Audit and reconciliation)]
 ```
@@ -27,12 +28,22 @@ flowchart LR
 | dbt quality gate | 104/104 data tests passing in a full Snowflake build |
 | Daily automation | GitHub Actions at 06:00 UTC using key-pair auth, with consecutive successful scheduled runs |
 | Race-week automation | Separate current-race workflow, scheduled twice hourly Friday–Sunday UTC and manually dispatchable |
-| Tableau delivery | Five published dashboards: Championship Monitor, Champs Behind The Wheel, Race Analysis, Race Winners and Team Detail Analysis |
+| Companion BI delivery | Five Tableau Public dashboards: Championship Monitor, Champs Behind The Wheel, Race Analysis, Race Winners and Team Detail Analysis |
+| Primary dashboard direction | React Championship Monitor implemented as a secure static-export client; publishing its first approved extract is pending |
 
 Daily ingestion, incremental dbt build and reconciliation use the scoped service user
 without interactive Duo approval.
 
-## Tableau Public delivery
+## Dashboard delivery
+
+### React: primary showcase
+
+The React Championship Monitor in [dashboards/react](dashboards/react) is the primary
+polished, interactive portfolio experience. It reads only approved static extracts
+from the MARTS export; browser code never contains Snowflake credentials or connects
+directly to Snowflake. Its first public data deployment is pending the approved export.
+
+### Tableau Public: published companion BI artifact
 
 The finished workbook is [F1_Analytics_Engineering_Platform.twb](dashboards/tableau/F1_Analytics_Engineering_Platform.twb). Explore the published [Tableau Public dashboard](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>).
 
@@ -71,5 +82,5 @@ Copy `.env.example` to `.env` for local configuration. Never commit passwords, t
 The engineering platform, daily automation, historical 2018–2025 coverage, race-week
 automation, and Tableau dashboard are delivered. See [architecture](docs/architecture.md)
 and the [race-week refresh design](docs/race_week.md) for current-race scope and limits.
-Tableau refresh automation beyond the free-tier manual republish workflow and portfolio
-résumé/LinkedIn material remain future enhancements.
+Automating the React extract publication, Tableau refresh beyond the free-tier manual
+republish workflow, and portfolio résumé/LinkedIn material remain future enhancements.
