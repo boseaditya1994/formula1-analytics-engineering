@@ -1,0 +1,80 @@
+name: Publish React dashboard
+
+on:
+  workflow_run:
+    workflows: ["Daily pipeline", "Race-week pipeline"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: react-dashboard-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install Python tooling
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.9.x"
+
+      - name: Install Python dependencies
+        run: uv sync --frozen
+
+      - name: Write service-user private key
+        run: |
+          umask 077
+          printf '%s' "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" > "$RUNNER_TEMP/f1_pipeline_svc.p8"
+          echo "SNOWFLAKE_PRIVATE_KEY_FILE=$RUNNER_TEMP/f1_pipeline_svc.p8" >> "$GITHUB_ENV"
+
+      - name: Generate approved public extracts
+        run: >-
+          uv run --frozen python scripts/export_dashboard_data.py
+          --out-dir dashboards/tableau/data
+          --react-out-dir dashboards/react/public/data
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dashboards/react/package-lock.json
+
+      - name: Build static React dashboard
+        working-directory: dashboards/react
+        run: npm ci && npm run build
+
+      - name: Prepare GitHub Pages asset paths
+        working-directory: dashboards/react
+        run: node scripts/prepare-pages.mjs
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboards/react/dist/client
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

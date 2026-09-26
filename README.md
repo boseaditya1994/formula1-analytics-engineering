@@ -41,7 +41,9 @@ without interactive Duo approval.
 The React Championship Monitor in [dashboards/react](dashboards/react) is the primary
 polished, interactive portfolio experience. It reads only approved static extracts
 from the MARTS export; browser code never contains Snowflake credentials or connects
-directly to Snowflake. Its first public data deployment is pending the approved export.
+directly to Snowflake. The `Publish React dashboard` workflow regenerates those
+extracts after successful daily or race-week runs and deploys the static site to
+GitHub Pages.
 
 ### Tableau Public: published companion BI artifact
 

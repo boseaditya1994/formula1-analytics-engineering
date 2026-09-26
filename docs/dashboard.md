@@ -28,6 +28,14 @@ The generated React files are gitignored. They are public presentation data and 
 be reviewed before a dashboard deployment; no Snowflake credential, private key, or
 profile is copied into the React project or browser bundle.
 
+## Automated public delivery
+
+`.github/workflows/publish_dashboard.yml` runs after a successful Daily pipeline or
+Race-week pipeline run, and can be manually dispatched. It regenerates the public
+extracts using the service user's private key only on the GitHub-hosted runner, builds
+the static React export, and deploys `dist/client` to GitHub Pages. The deployed
+artifact contains only browser assets and the three approved CSV extracts.
+
 ## Delivered companion workbook
 
 The finished Tableau Public workbook is [F1_Analytics_Engineering_Platform.twb](../dashboards/tableau/F1_Analytics_Engineering_Platform.twb) and is published on [Tableau Public](<https://public.tableau.com/views/F1_Analytics_Engineering_Platform/ChampionshipMonitor?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link>). It contains five interactive dashboards backed only by the exported mart fields:

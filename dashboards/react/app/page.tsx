@@ -59,9 +59,9 @@ export default function Home() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/data/driver_race_performance.csv").then((r) => r.ok ? r.text() : ""),
-      fetch("/data/driver_championship_progression.csv").then((r) => r.ok ? r.text() : ""),
-      fetch("/data/constructor_championship_progression.csv").then((r) => r.ok ? r.text() : ""),
+      fetch("data/driver_race_performance.csv").then((r) => r.ok ? r.text() : ""),
+      fetch("data/driver_championship_progression.csv").then((r) => r.ok ? r.text() : ""),
+      fetch("data/constructor_championship_progression.csv").then((r) => r.ok ? r.text() : ""),
     ]).then(([raceText, driverText, constructorText]) => {
       const nextRaces = parseCsv(raceText);
       setRaces(nextRaces); setDrivers(parseCsv(driverText)); setConstructors(parseCsv(constructorText));
